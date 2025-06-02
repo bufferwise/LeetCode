@@ -1,30 +1,24 @@
 public class Solution {
     public int candy(int[] ratings) {
         int n = ratings.length;
-        int[] candies = new int[n];
+        if (n <= 1) return n;
         
-        // Give 1 candy to each child initially
-        for (int i = 0; i < n; i++) {
-            candies[i] = 1;
-        }
+        int up = 0, down = 0, peak = 0, total = 1;
         
-        // Left to right pass
         for (int i = 1; i < n; i++) {
-            if (ratings[i] > ratings[i - 1]) {
-                candies[i] = candies[i - 1] + 1;
+            if (ratings[i - 1] < ratings[i]) {
+                up++;
+                down = 0;
+                peak = up;
+                total += 1 + up;
+            } else if (ratings[i - 1] > ratings[i]) {
+                up = 0;
+                down++;
+                total += 1 + down - (peak >= down ? 1 : 0);
+            } else {
+                up = down = peak = 0;
+                total++;
             }
-        }
-        
-        // Right to left pass
-        for (int i = n - 2; i >= 0; i--) {
-            if (ratings[i] > ratings[i + 1]) {
-                candies[i] = Math.max(candies[i], candies[i + 1] + 1);
-            }
-        }
-        
-        int total = 0;
-        for (int candy : candies) {
-            total += candy;
         }
         
         return total;
