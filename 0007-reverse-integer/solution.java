@@ -1,16 +1,21 @@
 class Solution {
     public int reverse(int x) {
-        return solution(x, 0);
-    }
-
-    public int solution(int x, int rev) {
-        if (x == 0) return rev;
-        if (rev > Integer.MAX_VALUE / 10 || rev < Integer.MIN_VALUE / 10) return 0;
-
-        int rem = x % 10;
-        x = x / 10;
-        rev = rev * 10 + rem;
-
-        return solution(x, rev);
+        int result = 0;
+        
+        while (x != 0) {
+            int digit = x % 10;
+            x /= 10;
+            
+            // Check overflow before multiplying by 10
+            if (result > Integer.MAX_VALUE / 10 || 
+                (result == Integer.MAX_VALUE / 10 && digit > 7)) return 0;
+            
+            if (result < Integer.MIN_VALUE / 10 || 
+                (result == Integer.MIN_VALUE / 10 && digit < -8)) return 0;
+            
+            result = result * 10 + digit;
+        }
+        
+        return result;
     }
 }
