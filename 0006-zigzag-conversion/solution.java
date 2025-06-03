@@ -1,30 +1,15 @@
 class Solution {
     public String convert(String s, int numRows) {
         if (numRows == 1) return s;
-        
-        StringBuilder[] rows = new StringBuilder[numRows];
+        StringBuilder a = new StringBuilder();
         for (int i = 0; i < numRows; i++) {
-            rows[i] = new StringBuilder();
-        }
-        
-        int row = 0;
-        boolean down = false;
-        
-        for (char c : s.toCharArray()) {
-            rows[row].append(c);
-            
-            if (row == 0 || row == numRows - 1) {
-                down = !down;
+            for (int j = i; j < s.length(); j += (2 * (numRows - 1))) {
+                a.append(s.charAt(j));
+                if (i > 0 && i < numRows - 1 && j + (2 * (numRows - 1)) - (2 * i) < s.length()) {
+                    a.append(s.charAt(j + (2 * (numRows - 1)) - (2 * i)));
+                }
             }
-            
-            row += down ? 1 : -1;
         }
-        
-        StringBuilder result = new StringBuilder();
-        for (StringBuilder sb : rows) {
-            result.append(sb);
-        }
-        
-        return result.toString();
+        return a.toString();
     }
 }
