@@ -1,27 +1,36 @@
 class Solution {
-    int maxLen = 0;
-    int lo = 0;
     public String longestPalindrome(String s) {
-        char[] input = s.toCharArray();
-        if(s.length() < 2) {
-            return s;
+        char[] sChars = s.toCharArray();
+
+        int m = s.length();
+
+        // * dp[i][len + 1] means substring starting from i with length of len;
+        boolean[][] dp = new boolean[m][2];
+        int currCol = 0;
+
+        int maxLen = 0;
+        int ans = 0; // record start index of s
+
+        for (int len = 0; len < m; len++) {
+            for (int start = 0; start + len < m; start++) {
+                int end = start + len;
+                if (len == 0) {
+                    dp[start][currCol] = true;
+                } else if (len == 1) {
+                    dp[start][currCol] = (sChars[start] == sChars[end]);
+                } else {
+                    dp[start][currCol] = (sChars[start] == sChars[end] && dp[start + 1][currCol]);
+                }
+
+                if (dp[start][currCol] && len + 1 > maxLen) {
+                    ans = start;
+                    maxLen = len + 1;
+                }
+            }
+
+            currCol = 1 - currCol;
         }
-        
-        for(int i = 0; i<input.length; i++) {
-            expandPalindrome(input, i, i);
-            expandPalindrome(input, i, i+1);
-        }
-        return s.substring(lo, lo+maxLen);
-    }
-    
-    public void expandPalindrome(char[] s, int j, int k) {
-        while(j >= 0 && k < s.length && s[j] == s[k]) {
-            j--;
-            k++;
-        }
-        if(maxLen < k - j - 1) {
-            maxLen = k - j - 1;
-            lo = j+1;
-        }
+
+        return maxLen == 0 ? "" : s.substring(ans, ans + maxLen);
     }
 }
