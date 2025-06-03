@@ -1,22 +1,14 @@
-/**
- * @param {number} x
- * @return {number}
- */
 var reverse = function(x) {
-    let s= x.toString()
-    let reversed = s.split('').reverse().join('')
-    let n = parseInt(reversed)
-    const max=2**31-1
-    const min=-(2**31)
-    if(n>max||n<min)
-    {
-        return 0
+    function helper(x, rev) {
+        if (x === 0) return rev;
+        if (rev > Math.trunc(2147483647 / 10) || rev < Math.trunc(-2147483648 / 10)) return 0;
+
+        let rem = x % 10;
+        x = Math.trunc(x / 10);
+        rev = rev * 10 + rem;
+
+        return helper(x, rev);
     }
-    else
-    {
-if(x<0)
-        return -n
-        else 
-        return n
-    } 
+
+    return helper(x, 0);
 };
