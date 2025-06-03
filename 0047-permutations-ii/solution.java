@@ -1,27 +1,28 @@
-import java.util.*;
-
 class Solution {
+    HashSet <List<Integer>> set = new HashSet<>();
     public List<List<Integer>> permuteUnique(int[] nums) {
-        List<List<Integer>> result = new ArrayList<>();
-        Arrays.sort(nums);
-        backtrack(nums, new ArrayList<>(), new boolean[nums.length], result);
-        return result;
+        boolean used[] = new boolean[nums.length];
+        permute(new ArrayList<Integer>(),nums, used);
+        return new ArrayList(set);
     }
     
-    private void backtrack(int[] nums, List<Integer> path, boolean[] used, List<List<Integer>> result) {
-        if (path.size() == nums.length) {
-            result.add(new ArrayList<>(path));
+    public void permute(List<Integer> permutation, int []nums,  boolean used[]){
+                
+        if(permutation.size() == nums.length){
+            set.add(new ArrayList<Integer>(permutation));
             return;
         }
-        
-        for (int i = 0; i < nums.length; i++) {
-            if (used[i] || i > 0 && nums[i] == nums[i-1] && !used[i-1]) continue;
-            
-            path.add(nums[i]);
-            used[i] = true;
-            backtrack(nums, path, used, result);
-            path.remove(path.size() - 1);
-            used[i] = false;
+
+        for(int i = 0; i < nums.length; i++){
+            if(!used[i]){
+                permutation.add(nums[i]);
+                used[i] = true;
+                permute(permutation, nums, used);
+                permutation.remove(permutation.size()-1);
+                used[i] =false;
+            }
+
         }
+        
     }
 }
