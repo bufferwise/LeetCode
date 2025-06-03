@@ -1,36 +1,30 @@
 class Solution {
-    public static String convert(String arr, int rows) {
-        int std = 2*rows - 2;
-        int len = arr.length();
-        char[] ans = new char[len];
-        int point = 0;
-        if(rows == 1 || rows > len) return arr;
-        for(int i = 0 ; i < rows ; i++) {
-            int j = i;
-            ans[point++] = arr.charAt(j);
-            while(true)
-            {
-                int k = j;
-                if(j + 2*(rows-i-1) >= len) break;
-                if(i != rows-1)
-                {
-                    j = j + 2*(rows-i-1);
-                    ans[point++] = arr.charAt(j);
-                }
-                if(j + 2*i >= len) break;
-                if(i!=0)
-                {
-                    j = j + 2*(i);
-                    ans[point++] = arr.charAt(j);
-                }
-                if(k == j)
-                {
-                    break;
-                }
-            }
+    public String convert(String s, int numRows) {
+        if (numRows == 1) return s;
+        
+        StringBuilder[] rows = new StringBuilder[numRows];
+        for (int i = 0; i < numRows; i++) {
+            rows[i] = new StringBuilder();
         }
-
-        String answer = new String(ans);
-        return answer;
+        
+        int row = 0;
+        boolean down = false;
+        
+        for (char c : s.toCharArray()) {
+            rows[row].append(c);
+            
+            if (row == 0 || row == numRows - 1) {
+                down = !down;
+            }
+            
+            row += down ? 1 : -1;
+        }
+        
+        StringBuilder result = new StringBuilder();
+        for (StringBuilder sb : rows) {
+            result.append(sb);
+        }
+        
+        return result.toString();
     }
 }
