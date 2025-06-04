@@ -1,19 +1,29 @@
 class Solution {
-    public String answerString(String word, int numFriends) {
-        if (numFriends == 1) return word;
-        
-        int n = word.length();
-        int maxLen = n - numFriends + 1;
-        String result = "";
-        
-        for (int i = 0; i < n; i++) {
-            int len = Math.min(maxLen, n - i);
-            String candidate = word.substring(i, i + len);
-            if (candidate.compareTo(result) > 0) {
-                result = candidate;
+
+    public String lastSubstring(String s) {
+        int i = 0, j = 1, n = s.length();
+        while (j < n) {
+            int k = 0;
+            while (j + k < n && s.charAt(i + k) == s.charAt(j + k)) {
+                k++;
+            }
+            if (j + k < n && s.charAt(i + k) < s.charAt(j + k)) {
+                int t = i;
+                i = j;
+                j = Math.max(j + 1, t + k + 1);
+            } else {
+                j = j + k + 1;
             }
         }
-        
-        return result;
+        return s.substring(i);
+    }
+
+    public String answerString(String word, int numFriends) {
+        if (numFriends == 1) {
+            return word;
+        }
+        String last = lastSubstring(word);
+        int n = word.length(), m = last.length();
+        return last.substring(0, Math.min(m, n - numFriends + 1));
     }
 }
