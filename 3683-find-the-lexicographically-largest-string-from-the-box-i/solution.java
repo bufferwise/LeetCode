@@ -1,29 +1,32 @@
-class Solution {
-
-    public String lastSubstring(String s) {
-        int i = 0, j = 1, n = s.length();
-        while (j < n) {
-            int k = 0;
-            while (j + k < n && s.charAt(i + k) == s.charAt(j + k)) {
-                k++;
-            }
-            if (j + k < n && s.charAt(i + k) < s.charAt(j + k)) {
-                int t = i;
-                i = j;
-                j = Math.max(j + 1, t + k + 1);
-            } else {
-                j = j + k + 1;
-            }
-        }
-        return s.substring(i);
-    }
-
-    public String answerString(String word, int numFriends) {
-        if (numFriends == 1) {
+public class Solution 
+{
+    public String answerString(String word, int numFriends) 
+    {
+        // Step 1: Edge case
+        if (numFriends == 1)
+        {
             return word;
+        } 
+
+        int n = word.length();
+        // Step 2: Compute max part length
+        int maxLen = n - numFriends + 1;
+        String res = "";
+
+        // Step 3: Scan all possible substrings
+        for (int i = 0; i < n; ++i) 
+        {
+            int k = Math.min(n - i, maxLen);
+            String substr = word.substring(i, i + k);
+
+            // Step 4: Update result if it's better
+            if (substr.compareTo(res) > 0) 
+            {
+                res = substr;
+            }
         }
-        String last = lastSubstring(word);
-        int n = word.length(), m = last.length();
-        return last.substring(0, Math.min(m, n - numFriends + 1));
+
+        // Step 5: Return the answer
+        return res;
     }
 }
