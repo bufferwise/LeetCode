@@ -1,50 +1,33 @@
-const auto _ = std::cin.tie(nullptr)->sync_with_stdio(false);
-#define LC_HACK
-#ifdef LC_HACK
-const auto __ = []() {
-    struct ___ {
-        static void _() { std::ofstream("display_runtime.txt") << 0 << '\n'; }
-    };
-    std::atexit(&___::_);
-    return 0;
-}();
-#endif
+struct Range { int val, min, max, smallest_digit; };
+vector<Range> range;
+int L;
+int bestProduct = -1;
+
 class Solution {
 public:
-    unordered_map<string, int> dp;
-    int k, l;
-
-    int f_(vector<int> &v, int i, long long p, int s, int prev, int taken){
-        if(i >= (int)v.size()){
-            if(taken && s == k && p <= l) return p;
-            return -1;
-        }
-
-        string key = to_string(i) + "," + to_string(p) + "," + to_string(s) + "," + to_string(prev) + "," + to_string(taken);
-        if(dp.count(key)) return dp[key];
-
-        int notTake = f_(v, i+1, p, s, prev, taken);
-
-        
-        long long newProd = p * v[i];
-        if(newProd > l) newProd = l + 1;
-
-        int newSum = prev ? s + v[i] : s - v[i];
-
-        int take = f_(v, i+1, newProd, newSum, !prev, 1);
-
-        return dp[key] = max(take, notTake);
+  static void choose(int i, unsigned long long prodSoFar, int k) {
+    if (bestProduct == L) return;
+    if (k > range[i].max || k < range[i].min) return;
+    if (prodSoFar*range[i].smallest_digit > L) return;
+    for(int j = i; j < range.size()-1; ++j) {
+      unsigned long long newProd = prodSoFar * range[j].val;
+      if (k == range[j].val && newProd <= L) bestProduct = max<int>(newProd, bestProduct);
+      if (bestProduct == -1 || (newProd > 0 && newProd <= L))
+        choose(j+1, newProd, range[j].val - k);
     }
-
-    int maxProduct(vector<int>& v, int k, int l) {
-        this->k = k;
-        this->l = l;
-
-        int sum = 0;
-        for(auto it: v) sum += it;
-        if(sum < abs(k)) return -1;
-
-        dp.clear();
-        return f_(v, 0, 1LL, 0, 1, 0);
+  }
+  int maxProduct(const vector<int> &nums, int k, int limit) {
+    range.resize(nums.size()+1);
+    range[range.size()-2] = { nums.back(), 0, nums.back(), nums.back() };
+    for(int i = (int)nums.size()-2; i >= 0; --i) {
+      range[i].val = nums[i];
+      range[i].max = max(range[i+1].max, nums[i] - range[i+1].min);
+      range[i].min = min(range[i+1].min, nums[i] - range[i+1].max);
+      range[i].smallest_digit = min(nums[i], range[i+1].smallest_digit);
     }
+    bestProduct = -1;
+    L = limit;
+    choose(0, 1, k);
+    return bestProduct;
+  }
 };
