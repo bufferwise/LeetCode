@@ -1,30 +1,34 @@
+#include <string>
+#include <vector>
+using namespace std;
+
 class Solution {
 public:
-    int find(int node, vector<int>&parent)
-    {
-        if(node != parent[node])
-        {
-            parent[node] = find(parent[node], parent);
+    string smallestEquivalentString(string s1, string s2, string baseStr) {
+        vector<int> parent(26);
+        iota(parent.begin(), parent.end(), 0);
+        
+        function<int(int)> find = [&](int x) {
+            return parent[x] == x ? x : parent[x] = find(parent[x]);
+        };
+        
+        for (int i = 0; i < s1.size(); ++i) {
+            int a = find(s1[i] - 'a'), b = find(s2[i] - 'a');
+            if (a != b) parent[max(a, b)] = min(a, b);
         }
-        return parent[node];
+        
+        string result;
+        result.reserve(baseStr.size());
+        for (char c : baseStr) {
+            result += char('a' + find(c - 'a'));
+        }
+        
+        return result;
     }
-    string smallestEquivalentString(string s1, string s2, string word) {
-        vector<int>parent(26);
-        for(int i=0;i<26;i++)parent[i] =i;
-        for(int i=0;i<s1.size();i++)
-        {
-            int u = find(s1[i]-'a', parent);
-            int v = find(s2[i]-'a', parent);
-            if(u!=v) parent[max(u, v)] = min(u, v);
-
-        }
-        string res ="";
-        for(char ch:word)
-        {
-            res+=char(find(ch-'a', parent)+ 'a');
-        }
-        return res;
-
-    }
-       
 };
+
+static const auto _ = []() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+    return 0;
+}();
