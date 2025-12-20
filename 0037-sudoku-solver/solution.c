@@ -1,65 +1,66 @@
+#include <stdbool.h>
 
-void solveSudoku(char **board, int boardSize, int *boardColSize) {
-  bool rowHash[9][10] = {false}, colHash[9][10] = {false}, blockHash[3][3][10] = {false}; // hash tables
-  int rowFilledCnt[9] = {0}, colFilledCnt[9] = {0}, blockFilledCnt[3][3] = {0};           // non-empty cell count
-  char path[81][3];                                                                       // searching path, (path[i] = {row, col, val})
-  int maxLen = 0;                                                                         // max legth of `path`(initial empty cell count)
+int rows[9];
+int cols[9];
+int boxes[9];
 
-  // 0. initialize helpers
-  for (int i = 0; i < 9; i++) {
-    for (int j = 0; j < 9; j++) {
-      int val = board[i][j] == '.' ? 0 : board[i][j] - '0';
-      if (val) {
-        rowHash[i][val] = true, colHash[j][val] = true, blockHash[i / 3][j / 3][val] = true;
-        rowFilledCnt[i]++, colFilledCnt[j]++, blockFilledCnt[i / 3][j / 3]++;
-      } else
-        memcpy(path[maxLen++], (char[]){i, j, 0}, 3);
+// Helper to get the box index (0-8)
+inline int getBox(int r, int c) {
+    return (r / 3) * 3 + (c / 3);
+}
+
+bool backtrack(char** board, int n) {
+    if (n == 81) return true; // Board full
+
+    int r = n / 9;
+    int c = n % 9;
+
+    if (board[r][c] != '.') {
+        return backtrack(board, n + 1);
     }
-  }
 
-  // 1. find optimal searching path
-  for (int curr = 0; curr < maxLen; curr++) {
-    // find the ideal cell with maximum sum of cnts in pathlist following `path[curr]`(included)
-    int maxCnt = -1, maxIdx = curr;
-    for (int k = curr; k < maxLen; k++) {
-      int i = path[k][0], j = path[k][1];
-      int currCnt = rowFilledCnt[i] + colFilledCnt[j] + blockFilledCnt[i / 3][j / 3];
-      if (currCnt > maxCnt)
-        maxCnt = currCnt, maxIdx = k;
-    }
-    // push ideal cell to front by swapping `path[curr]` and `path[maxIdx]`
-    int i = path[maxIdx][0], j = path[maxIdx][1];
-    memcpy(path[maxIdx], path[curr], 2);
-    memcpy(path[curr], (char[]){i, j}, 2);
-    // propagate by updating cnts
-    rowFilledCnt[i]++, colFilledCnt[j]++, blockFilledCnt[i / 3][j / 3]++;
-  }
+    int boxIdx = getBox(r, c);
+    // Combine masks: find bits that are 0 in all three sets
+    int used = rows[r] | cols[c] | boxes[boxIdx];
 
-  // 2. search for result, guided by path
-  for (int curr = 0; curr < maxLen;) {
-    int i = path[curr][0], j = path[curr][1], val = path[curr][2];
-    // discard current cell, propagate this change to hash tables
-    rowHash[i][val] = false, colHash[j][val] = false, blockHash[i / 3][j / 3][val] = false;
-    // try to find a valid value for current position
-    for (int n = val + 1; n < 10; n++) {
-      if (rowHash[i][n] || colHash[j][n] || blockHash[i / 3][j / 3][n])
-        continue;
-      else {
-        val = n;
-        break;
-      }
-    }
-    // check if valid value is found
-    if (val == path[curr][2]) { // not found, backtrack
-      path[curr][2] = 0;
-      curr--;
-    } else { // found, iterate forward
-      path[curr][2] = val, rowHash[i][val] = true, colHash[j][val] = true, blockHash[i / 3][j / 3][val] = true;
-      curr++;
-    }
-  }
+    for (int num = 1; num <= 9; num++) {
+        int mask = 1 << num;
+        if (!(used & mask)) {
+            // Set bit
+            board[r][c] = num + '0';
+            rows[r] |= mask;
+            cols[c] |= mask;
+            boxes[boxIdx] |= mask;
 
-  // 3. final: fill results back to grid
-  for (int i = 0; i < maxLen; i++)
-    board[path[i][0]][path[i][1]] = '0' + path[i][2];
+            if (backtrack(board, n + 1)) return true;
+
+            // Reset bit (Backtrack)
+            board[r][c] = '.';
+            rows[r] &= ~mask;
+            cols[c] &= ~mask;
+            boxes[boxIdx] &= ~mask;
+        }
+    }
+    return false;
+}
+
+void solveSudoku(char** board, int boardSize, int* boardColSize) {
+    // Reset bitmasks for new test cases
+    for (int i = 0; i < 9; i++) {
+        rows[i] = cols[i] = boxes[i] = 0;
+    }
+
+    // Pre-fill bitmasks with existing numbers
+    for (int r = 0; r < 9; r++) {
+        for (int c = 0; c < 9; c++) {
+            if (board[r][c] != '.') {
+                int mask = 1 << (board[r][c] - '0');
+                rows[r] |= mask;
+                cols[c] |= mask;
+                boxes[getBox(r, c)] |= mask;
+            }
+        }
+    }
+
+    backtrack(board, 0);
 }
