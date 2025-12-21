@@ -1,48 +1,23 @@
-#include <vector>
-#include <algorithm>
-
-using namespace std;
-
+const int N=1e5+1;
+long long sum[N];
 class Solution {
 public:
-    long long maxProfit(vector<int>& prices, vector<int>& strategy, int k) {
-        int n = prices.size();
-        long long baseProfit = 0;
-        
-        
-        for (int i = 0; i < n; ++i) {
-            baseProfit += (long long)strategy[i] * prices[i];
+    static long long maxProfit(vector<int>& prices, vector<int>& strategy, int k) {
+        const int n=prices.size(), k2=k/2;
+        memset(sum, 0, sizeof(long long)*(n+1));
+        for(int i=0; i<n; i++){
+            sum[i+1]=sum[i]+1LL*strategy[i]*prices[i];
         }
 
-        
-        long long currentGain = 0;
-        int halfK = k / 2;
-        
-        
-        for (int i = 0; i < halfK; ++i) {
-            currentGain -= (long long)strategy[i] * prices[i];
+        long long modify=reduce(prices.begin()+k2, prices.begin()+k, 0LL);
+        long long profit=max(sum[n], modify+sum[n]-sum[k]);
+
+        for(int i=1; i+k<=n; i++){ 
+            modify+=prices[i+k-1]-prices[i+k2-1];
+            profit=max(profit, modify+sum[n]-sum[i+k]+sum[i]);
         }
-        
-        for (int i = halfK; i < k; ++i) {
-            currentGain += (long long)(1 - strategy[i]) * prices[i];
-        }
-
-        long long maxGain = max(0LL, currentGain);
-
-        
-        for (int i = 1; i <= n - k; ++i) {
-            
-            currentGain += (long long)strategy[i - 1] * prices[i - 1];
-            
-            
-            currentGain -= prices[i + halfK - 1];
-            
-            
-            currentGain += (long long)(1 - strategy[i + k - 1]) * prices[i + k - 1];
-
-            if (currentGain > maxGain) maxGain = currentGain;
-        }
-
-        return baseProfit + maxGain;
+        return profit;
     }
 };
+
+
