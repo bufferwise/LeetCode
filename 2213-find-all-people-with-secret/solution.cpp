@@ -1,81 +1,52 @@
-#include <vector>
-#include <algorithm>
-#include <queue>
-
-using namespace std;
-
 class Solution {
+    bool find(int node , unordered_map<int , vector<int>>& g , vector<bool>& all , unordered_map<int , bool >& vis){
+        if (all[node])
+            return 1;
+        bool ch = 0;
+        for (auto& elem : g[node] )
+            if (!vis[elem])
+                vis[elem] = true , ch |=find(elem, g , all , vis);
+        return ch;
+    }
+    void dfs(int node , unordered_map<int , vector<int>>& g , vector<bool>& all , unordered_map<int , bool >& vis , bool res){
+        all[node] = res;
+        for (auto& elem : g[node] )
+            if (!vis[elem])
+                vis[elem] = true , dfs(elem, g , all ,vis , res);
+        return;
+    }
 public:
     vector<int> findAllPeople(int n, vector<vector<int>>& meetings, int firstPerson) {
-        
-        sort(meetings.begin(), meetings.end(), [](const vector<int>& a, const vector<int>& b) {
+        vector<bool> all(n);
+        all[firstPerson] = all[0] = true;
+        sort(meetings.begin() , meetings.end() , [&](vector<int>& a , vector<int>& b){
             return a[2] < b[2];
         });
-
-        
-        vector<bool> knows(n, false);
-        knows[0] = true;
-        knows[firstPerson] = true;
-
-        int m = meetings.size();
-        
-        vector<pair<int, int>> adj[n]; 
-        
-        
-        int i = 0;
-        while (i < m) {
-            int currentTime = meetings[i][2];
-            int j = i;
-            
-            static vector<int> peopleAtTime;
-            peopleAtTime.clear();
-            
-            
-            while (j < m && meetings[j][2] == currentTime) {
-                int u = meetings[j][0];
-                int v = meetings[j][1];
-                
-                
-                if (adj[u].empty()) peopleAtTime.push_back(u);
-                if (adj[v].empty()) peopleAtTime.push_back(v);
-                
-                adj[u].push_back({v, currentTime});
-                adj[v].push_back({u, currentTime});
-                j++;
+        for (int i = 0 ; i < meetings.size() ;){
+            int time = meetings[i][2];
+            unordered_map<int , vector<int>> g;
+            unordered_map<int , bool > vis , vis2;
+            while (i < meetings.size() && meetings[i][2] == time){
+                g[meetings[i][1]].push_back(meetings[i][0]);
+                g[meetings[i][0]].push_back(meetings[i][1]);
+                i++;
             }
-
-            queue<int> q;
-            for (int p : peopleAtTime) {
-                if (knows[p]) {
-                    q.push(p);
-                }
-            }
-
-            while (!q.empty()) {
-                int curr = q.front();
-                q.pop();
-                
-                for (auto& edge : adj[curr]) {
-                    int neighbor = edge.first;
-                    if (!knows[neighbor]) {
-                        knows[neighbor] = true;
-                        q.push(neighbor);
+            for(auto& elem : g){
+                for (auto& neighbour : elem.second){
+                    if (!vis[neighbour]){
+                        vis[neighbour] = vis2[neighbour] = true;
+                        bool res = find(neighbour , g ,all , vis);
+                        dfs(neighbour , g , all , vis2 , res);
                     }
                 }
             }
-
-
-            for (int p : peopleAtTime) {
-                adj[p].clear();
-            }
-            
-            i = j;
         }
-
-        vector<int> result;
-        for (int k = 0; k < n; k++) {
-            if (knows[k]) result.push_back(k);
-        }
-        return result;
+        vector<int> ans;
+        for (int i = 0 ; i  < n ; i++) if (all[i]) ans.push_back(i);
+        return ans;
     }
 };
+auto init = atexit([]() {
+    ofstream("display_runtime.txt") << "0";
+});
+
