@@ -1,102 +1,48 @@
-#pragma GCC target("abm")
-#pragma GCC target("bmi")
-#pragma GCC target("avx2")
-#pragma GCC target("bmi2")
-#pragma GCC target("lzcnt")
-#pragma GCC target("popcnt")
-#pragma GCC target("native")
-#pragma GCC optimize("O3")
-#pragma GCC optimize("Ofast")
-#pragma GCC optimize("inline")
-#pragma GCC optimize("-fgcse")
-#pragma GCC optimize("fast-math")
-#pragma GCC optimize("-fgcse-lm")
-#pragma GCC optimize("-fipa-sra")
-#pragma GCC optimize("-ftree-pre")
-#pragma GCC optimize("-ftree-vrp")
-#pragma GCC optimize("-fpeephole2")
-#pragma GCC optimize("-ffast-math")
-#pragma GCC optimize("-fsched-spec")
-#pragma GCC optimize("unroll-loops")
-#pragma GCC optimize("-march=native")
-#pragma GCC optimize("-falign-jumps")
-#pragma GCC optimize("-falign-loops")
-#pragma GCC optimize("-falign-labels")
-#pragma GCC optimize("-fdevirtualize")
-#pragma GCC optimize("-fcaller-saves")
-#pragma GCC optimize("-fcrossjumping")
-#pragma GCC optimize("-fthread-jumps")
-#pragma GCC optimize("-funroll-loops")
-#pragma GCC optimize("-freorder-blocks")
-#pragma GCC optimize("-fschedule-insns")
-#pragma GCC optimize("inline-functions")
-#pragma GCC optimize("-ftree-tail-merge")
-#pragma GCC optimize("-fschedule-insnS2")
-#pragma GCC optimize("-fstrict-aliasing")
-#pragma GCC optimize("-falign-functions")
-#pragma GCC optimize("-fcse-follow-jumps")
-#pragma GCC optimize("-fsched-interblock")
-#pragma GCC optimize("-fpartial-inlining")
-#pragma GCC optimize("no-stack-protector")
-#pragma GCC optimize("-freorder-functions")
-#pragma GCC optimize("-findirect-inlining")
-#pragma GCC optimize("-fhoist-adjacent-loads")
-#pragma GCC optimize("-frerun-cse-after-loop")
-#pragma GCC optimize("inline-small-functions")
-#pragma GCC optimize("-finline-small-functions")
-#pragma GCC optimize("-ftree-switch-conversion")
-#pragma GCC optimize("-foptimize-sibling-calls")
-#pragma GCC optimize("-fexpensive-optimizations")
-#pragma GCC optimize("inline-functions-called-once")
-#pragma GCC optimize("-fdelete-null-Pointer-checks")
-static const bool __boost = []() {
-   cin.tie(nullptr);
-   cout.tie(nullptr);
-   return std::ios_base::sync_with_stdio(false);
-}();
-const size_t BUFFER_SIZE = 0x6fafffff;
-alignas(std::max_align_t) char buffer[BUFFER_SIZE];
-size_t buffer_pos = 0;
-void* operator new(size_t size) {
-   constexpr std::size_t alignment = alignof(std::max_align_t);
-   size_t padding = (alignment - (buffer_pos % alignment)) % alignment;
-   size_t total_size = size + padding;
-   char* aligned_ptr = &buffer[buffer_pos + padding];
-   buffer_pos += total_size;
-   return aligned_ptr;
-}
-void operator delete(void* ptr, unsigned long) {}
-void operator delete(void* ptr) {}
-void operator delete[](void* ptr) {}
-const auto __ = []() {
-   struct Leetcode {
-       static void _() { std::ofstream("display_runtime.txt") << 0 << '\n'; }
-   };
-   std::atexit(&Leetcode::_);
-   return 0;
-}();
+#include <vector>
+#include <algorithm>
+
+using namespace std;
 
 class Solution {
 public:
     long long maxProfit(vector<int>& prices, vector<int>& strategy, int k) {
-        long long res{LLONG_MIN};
-        long long sum{0};
-        int half = k >> 1;
-        long long total = 0;
-        for (int i{0}; i < half; ++i) total += prices[i] * strategy[i];
-        for (int i{half}; i < k; ++i) {
-            sum += prices[i];
-            total += prices[i] * strategy[i];
+        int n = prices.size();
+        long long baseProfit = 0;
+        
+        
+        for (int i = 0; i < n; ++i) {
+            baseProfit += (long long)strategy[i] * prices[i];
         }
-        for (int i{k}; i < prices.size(); ++i) {
-            int val{prices[i] * strategy[i]};
-            sum += val;
-            total += val;
+
+        
+        long long currentGain = 0;
+        int halfK = k / 2;
+        
+        
+        for (int i = 0; i < halfK; ++i) {
+            currentGain -= (long long)strategy[i] * prices[i];
         }
-        for (int i{k}; i < prices.size(); ++i, ++half) {
-            res = max(res, sum);
-            sum += static_cast<long long>(prices[i]) - (prices[i] * strategy[i]) - prices[half] + (prices[i - k] * strategy[i - k]);
+        
+        for (int i = halfK; i < k; ++i) {
+            currentGain += (long long)(1 - strategy[i]) * prices[i];
         }
-        return max({res, sum, total});
+
+        long long maxGain = max(0LL, currentGain);
+
+        
+        for (int i = 1; i <= n - k; ++i) {
+            
+            currentGain += (long long)strategy[i - 1] * prices[i - 1];
+            
+            
+            currentGain -= prices[i + halfK - 1];
+            
+            
+            currentGain += (long long)(1 - strategy[i + k - 1]) * prices[i + k - 1];
+
+            if (currentGain > maxGain) maxGain = currentGain;
+        }
+
+        return baseProfit + maxGain;
     }
 };
