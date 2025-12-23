@@ -75,5 +75,11 @@ int maxTwoEvents(int** events, int eventsSize, int* eventsColSize) {
         ret = (ret > cur_val)? ret : cur_val;
     }
 
+    /*
+    for (int i = 0; i < eventsSize; i++) {
+        printf("%d ", events[i][START]);
+    }
+    */
+
     return ret;
 }
