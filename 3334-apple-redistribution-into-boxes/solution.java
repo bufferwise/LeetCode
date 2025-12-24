@@ -1,31 +1,19 @@
-class Solution 
-{
-    public int minimumBoxes(int[] apple, int[] capacity) 
-    {
-        int total = 0 ;
-        int cnt = 0 ;
+import java.util.Arrays;
 
-        for(int i=0 ; i<apple.length ; i++)
-        {
-            total =total + apple[i] ;
+class Solution {
+    public int minimumBoxes(int[] apple, int[] capacity) {
+        int totalApples = 0;
+        for (int a : apple) totalApples += a;
+        
+        Arrays.sort(capacity);
+        int count = 0;
+        
+        for (int i = capacity.length - 1; i >= 0; i--) {
+            totalApples -= capacity[i];
+            count++;
+            if (totalApples <= 0) break;
         }
-
-        Arrays.sort(capacity) ;
-
-        for(int i=capacity.length-1 ; i>=0  ; i--)
-        {
-            if(total == 0) break ; 
-            if(capacity[i] <= total && total >0)
-            {
-                cnt++;
-                total= total - capacity[i] ;
-            }
-            else
-            {
-                cnt++ ;
-                total = 0 ;
-            }
-        }   
-        return cnt ;
+        
+        return count;
     }
 }
