@@ -1,29 +1,59 @@
-#include <vector>
-#include <map>
-#include <algorithm>
-
 class Solution {
+    static bool processBasket(vector<int>& basket) {
+        const int length = basket.size();
+
+        int i, j;
+        for (i = 0; (i != length) && (basket[i] != -1); i++) {}
+        for (j = i; (j != length) && (basket[j] == -1); j++) {}
+
+        while (j != length) {
+            basket[i++] = basket[j++];
+            for (; (j != length) && (basket[j] == -1); j++) {}
+        }
+
+        basket.resize(i);
+
+        if (i == 0)
+            return true;
+
+        int count = 1;
+
+        for (i -= 2; i != -1; i--)
+            if (basket[i] != basket[i + 1]) {
+                if ((count & 1) == 1)
+                    return false;
+                
+                count = 1;
+            } else
+                count++;
+
+        return (count & 1) != 1;
+    }
+
 public:
-    long long minCost(std::vector<int>& basket1, std::vector<int>& basket2) {
-        std::map<int, int> count;
-        int min_val = INT_MAX;
-        for (int x : basket1) { count[x]++; min_val = std::min(min_val, x); }
-        for (int x : basket2) { count[x]--; min_val = std::min(min_val, x); }
+    long long minCost(vector<int>& basket1, vector<int>& basket2) {
+        sort(basket1.begin(), basket1.end());
+        sort(basket2.begin(), basket2.end());
 
-        std::vector<int> swap_list;
-        for (auto const& [val, freq] : count) {
-            if (freq % 2 != 0) return -1;
-            for (int i = 0; i < std::abs(freq) / 2; ++i) {
-                swap_list.push_back(val);
-            }
-        }
-
-        std::sort(swap_list.begin(), swap_list.end());
-        long long total_cost = 0;
+        const int bl = basket1.size(), minCost = min(basket1[0], basket2[0]) * 2;
         
-        for (int i = 0; i < swap_list.size() / 2; ++i) {
-            total_cost += std::min(swap_list[i], 2 * min_val);
-        }
-        return total_cost;
+        for (int i1 = 0, i2 = 0; (i1 != bl) && (i2 != bl);)
+            if (basket1[i1] < basket2[i2])
+                i1++;
+            else if (basket2[i2] < basket1[i1])
+                i2++;
+            else
+                basket1[i1++] = basket2[i2++] = -1;
+        
+        if (!processBasket(basket1) || !processBasket(basket2))
+            return -1;
+
+        long long result = 0;
+
+        for (int i1 = 0, i2 = 0, c = basket1.size(); c != 0; c--)
+            result += min(minCost,
+                basket1[i1] < basket2[i2] ? basket1[i1++] : basket2[i2++]);
+
+        return result / 2;
     }
 };
