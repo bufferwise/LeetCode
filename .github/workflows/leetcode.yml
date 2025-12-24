@@ -3,7 +3,7 @@ name: Sync Leetcode
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 8 * * 6"
+    - cron: "0 0 * * *"
 
 jobs:
   build:
@@ -16,6 +16,6 @@ jobs:
           github-token: ${{ github.token }}
           leetcode-csrf-token: ${{ secrets.LEETCODE_CSRF_TOKEN }}
           leetcode-session: ${{ secrets.LEETCODE_SESSION }}
-          # destination-folder: my-folder
+          filter-duplicate-secs: 0
           verbose: true
           commit-header: "chore: sync automated leetcode submissions with"
