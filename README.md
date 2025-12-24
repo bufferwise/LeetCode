@@ -1,2 +1,1 @@
-# LeetCode
-LeetCode solutions from @bufferwise, who began utilizing them in the middle of 2025.
+![LeetCode Stats](https://leetcard.jacoblin.cool/buffwr?theme=catppuccinMocha&font=DM%20Mono&ext=activity)
