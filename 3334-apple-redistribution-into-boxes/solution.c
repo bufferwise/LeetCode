@@ -3,16 +3,23 @@ int minimumBoxes(int* apple, int appleSize, int* capacity, int capacitySize) {
     for (int i = 0; i < appleSize; i++) {
         totalApples += apple[i];
     }
-
-    int compare(const void *a, const void *b) {
-        return (*(int*)b - *(int*)a);
+    for (int i = 0; i < capacitySize - 1; i++) {
+        for (int j = i + 1; j < capacitySize; j++) {
+            if (capacity[i] < capacity[j]) {
+                int temp = capacity[i];
+                capacity[i] = capacity[j];
+                capacity[j] = temp;
+            }
+        }
     }
-    qsort(capacity, capacitySize, sizeof(int), compare);
-
-    int count = 0;
-    while (totalApples > 0) {
-        totalApples -= capacity[count];
-        count++;
+    int usedBoxes = 0;
+    int currentCapacity = 0;
+    for (int i = 0; i < capacitySize; i++) {
+        currentCapacity += capacity[i];
+        usedBoxes++;
+        if (currentCapacity >= totalApples) {
+            break;
+        }
     }
-    return count;
+    return usedBoxes;
 }
